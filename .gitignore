@@ -5,4 +5,6 @@ coverage/
 .tmp-package-test/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
+docs/.vitepress/config.ts.timestamp-*.mjs
+tsup.config.bundled_*.mjs
 testData/

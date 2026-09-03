@@ -36,6 +36,18 @@ describe.each(['local', 'session'] as const)('%s driver', driver => {
     expect(await store.entries<number>()).toEqual([{ key: 'a', value: 1 }, { key: 'b', value: 2 }])
     expect((await store.removeMany(['a', 'missing'])).data).toBe(1)
   })
+
+  it('reports getMany statistics per request, not per unique key', async () => {
+    const store = new OmniStore({ driver, namespace: 'batch-stats' })
+    await store.setMany([['a', 1], ['b', 2]])
+    const result = await store.getMany<number>(['a', 'b', 'missing', 'a'])
+    expect(result.total).toBe(4)
+    expect(result.succeeded).toBe(4)
+    expect(result.failed).toBe(0)
+    expect(result.data.get('a')).toBe(1)
+    expect(result.data.get('b')).toBe(2)
+    expect(result.data.get('missing')).toBeNull()
+  })
 })
 
 describe('validation and environment behavior', () => {
@@ -51,6 +63,13 @@ describe('validation and environment behavior', () => {
 
   it('enforces secure SameSite=None cookies', () => {
     expect(() => new OmniStore({ driver: 'cookie', cookie: { sameSite: 'none' } })).toThrow(/Secure/)
+  })
+
+  it('normalizes remove failures into OmniStoreError', async () => {
+    const store = new OmniStore({ driver: 'local' })
+    const remove = vi.spyOn(localStorage, 'removeItem').mockImplementation(() => { throw new DOMException('denied', 'SecurityError') })
+    await expect(store.remove('key')).rejects.toMatchObject({ code: 'OPERATION_FAILED' })
+    remove.mockRestore()
   })
 })
 

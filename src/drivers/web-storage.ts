@@ -8,7 +8,7 @@ export class WebStorageDriver implements StorageDriver {
   private scoped(key: StorageKey) { return `${this.namespace}:${String(key)}` }
   async get(key: StorageKey) { try { const raw = this.storage.getItem(this.scoped(key)); if (raw === null) return null; const item = parseEnvelope(raw); if (!item) return null; if (isExpired(item)) { this.storage.removeItem(this.scoped(key)); return null } return item.value } catch (error) { throw normalizeError(error, 'get') } }
   async set(key: StorageKey, value: string, options: SetOptions = {}) { try { this.storage.setItem(this.scoped(key), JSON.stringify(createEnvelope(value, options.ttl))) } catch (error) { throw normalizeError(error, 'set') } }
-  async remove(key: StorageKey) { const scoped = this.scoped(key); const existed = this.storage.getItem(scoped) !== null; this.storage.removeItem(scoped); return existed }
+  async remove(key: StorageKey) { try { const scoped = this.scoped(key); const existed = this.storage.getItem(scoped) !== null; this.storage.removeItem(scoped); return existed } catch (error) { throw normalizeError(error, 'remove') } }
   async has(key: StorageKey) { return (await this.get(key)) !== null }
   async keys() { const prefix = `${this.namespace}:`; const result: string[] = []; for (let i = 0; i < this.storage.length; i++) { const key = this.storage.key(i); if (key?.startsWith(prefix)) result.push(key.slice(prefix.length)) } return result }
   async size() { return (await this.keys()).length }
