@@ -12,5 +12,5 @@ export class WebStorageDriver implements StorageDriver {
   async has(key: StorageKey) { return (await this.get(key)) !== null }
   async keys() { const prefix = `${this.namespace}:`; const result: string[] = []; for (let i = 0; i < this.storage.length; i++) { const key = this.storage.key(i); if (key?.startsWith(prefix)) result.push(key.slice(prefix.length)) } return result }
   async size() { return (await this.keys()).length }
-  async clear() { for (const key of await this.keys()) this.storage.removeItem(this.scoped(key)) }
+  async clear() { try { for (const key of await this.keys()) this.storage.removeItem(this.scoped(key)) } catch (error) { throw normalizeError(error, 'clear') } }
 }

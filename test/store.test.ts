@@ -71,6 +71,15 @@ describe('validation and environment behavior', () => {
     await expect(store.remove('key')).rejects.toMatchObject({ code: 'OPERATION_FAILED' })
     remove.mockRestore()
   })
+
+  it('normalizes clear failures into OmniStoreError', async () => {
+    const store = new OmniStore({ driver: 'local' })
+    await store.set('key', 1)
+    const remove = vi.spyOn(localStorage, 'removeItem').mockImplementation(() => { throw new DOMException('denied', 'SecurityError') })
+    await expect(store.clear()).rejects.toMatchObject({ code: 'OPERATION_FAILED' })
+    remove.mockRestore()
+    localStorage.clear()
+  })
 })
 
 describe('cookie driver', () => {
@@ -81,6 +90,34 @@ describe('cookie driver', () => {
     expect(await store.get('theme')).toBe('dark')
     expect(await store.keys()).toEqual(['theme'])
     expect(await store.remove('theme')).toBe(true)
+  })
+
+  it('serializes every supported cookie attribute', async () => {
+    const store = new OmniStore({
+      driver: 'cookie',
+      namespace: 'attr-test',
+      cookie: { path: '/', maxAge: 60, sameSite: 'strict', secure: true, partitioned: true, expires: new Date(Date.now() + 60_000) }
+    })
+    await store.set('theme', 'dark')
+    expect(await store.get('theme')).toBe('dark')
+    expect(await store.has('theme')).toBe(true)
+  })
+
+  it('writes a session cookie when no attributes are set', async () => {
+    const store = new OmniStore({ driver: 'cookie', namespace: 'plain-test' })
+    await store.set('theme', 'dark')
+    expect(await store.get('theme')).toBe('dark')
+    expect(await store.size()).toBe(1)
+  })
+
+  it('returns null for missing keys and drops expired cookies', async () => {
+    const store = new OmniStore({ driver: 'cookie', namespace: 'expire-test' })
+    expect(await store.get('missing')).toBeNull()
+    expect(await store.has('missing')).toBe(false)
+    await store.set('short', 'lived', { ttl: 1 })
+    await new Promise(resolve => setTimeout(resolve, 5))
+    expect(await store.get('short')).toBeNull()
+    expect(await store.keys()).toEqual([])
   })
 })
 
