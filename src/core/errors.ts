@@ -1,0 +1,3 @@
+export type OmniStoreErrorCode = 'DRIVER_UNAVAILABLE' | 'INVALID_OPTION' | 'SERIALIZATION_FAILED' | 'QUOTA_EXCEEDED' | 'OPERATION_FAILED'
+export class OmniStoreError extends Error { constructor(readonly code: OmniStoreErrorCode, message: string, readonly cause?: unknown) { super(message); this.name = 'OmniStoreError' } }
+export function normalizeError(error: unknown, operation: string): OmniStoreError { if (error instanceof OmniStoreError) return error; if (error instanceof DOMException && error.name === 'QuotaExceededError') return new OmniStoreError('QUOTA_EXCEEDED', `Storage quota exceeded during ${operation}.`, error); return new OmniStoreError('OPERATION_FAILED', `Storage operation failed during ${operation}.`, error) }
