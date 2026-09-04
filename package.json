@@ -1,20 +1,45 @@
 {
-  "name": "omni-store-kit",
-  "version": "0.1.0-beta.1",
+  "name": "omni-storage-kit",
+  "version": "1.0.0",
   "description": "A typed unified browser storage toolkit for localStorage, sessionStorage, IndexedDB, and cookies.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "require": "./dist/index.cjs" } },
-  "files": ["dist", "README.md", "LICENSE"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
-  "engines": { "node": ">=20" },
+  "publishConfig": { "access": "public" },
+  "engines": {
+    "node": ">=20"
+  },
   "packageManager": "pnpm@10.15.1",
-  "repository": { "type": "git", "url": "git+https://github.com/yeyongzhi/OmniStore.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yeyongzhi/OmniStore.git"
+  },
   "homepage": "https://yeyongzhi.github.io/OmniStore/",
-  "bugs": { "url": "https://github.com/yeyongzhi/OmniStore/issues" },
-  "keywords": ["storage", "localstorage", "sessionstorage", "indexeddb", "cookie", "typescript"],
+  "bugs": {
+    "url": "https://github.com/yeyongzhi/OmniStore/issues"
+  },
+  "keywords": [
+    "storage",
+    "localstorage",
+    "sessionstorage",
+    "indexeddb",
+    "cookie",
+    "typescript"
+  ],
   "license": "MIT",
   "author": "Aurora",
   "scripts": {
@@ -23,13 +48,16 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "check": "pnpm typecheck && pnpm test:coverage && pnpm build && pnpm docs:build",
+    "test:browser": "tsup src/index.ts --format iife --global-name OmniStorageKit --out-dir .tmp-browser-test --clean && playwright test",
+    "check": "pnpm typecheck && pnpm test:coverage && pnpm test:browser && pnpm build && pnpm docs:build",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
+    "prepack": "pnpm build",
     "prepublishOnly": "pnpm check"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "^24.3.0",
     "@vitest/coverage-v8": "^3.2.4",
     "fake-indexeddb": "^6.2.2",

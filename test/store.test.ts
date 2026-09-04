@@ -30,6 +30,16 @@ describe.each(['local', 'session'] as const)('%s driver', driver => {
     expect(await store.keys()).toEqual(['alive'])
   })
 
+  it('excludes expired values from keys and size', async () => {
+    vi.useFakeTimers()
+    const store = new OmniStore({ driver, namespace: 'ttl-enumeration' })
+    await store.set('expired', true, { ttl: 10 })
+    await store.set('alive', true)
+    vi.advanceTimersByTime(11)
+    expect(await store.keys()).toEqual(['alive'])
+    expect(await store.size()).toBe(1)
+  })
+
   it('supports batch operations and entries', async () => {
     const store = new OmniStore({ driver, namespace: 'batch' })
     expect((await store.setMany([['a', 1], ['b', 2]])).succeeded).toBe(2)
@@ -130,6 +140,12 @@ describe('indexedDB driver', () => {
     expect(await store.get(1)).toEqual({ ok: true })
     await store.setMany([[2, 'two'], [3, 'three']])
     expect(await store.size()).toBe(3)
+    expect(await store.keys()).toEqual(['1', '2', '3'])
+    expect(await store.entries()).toEqual([
+      { key: '1', value: { ok: true } },
+      { key: '2', value: 'two' },
+      { key: '3', value: 'three' },
+    ])
     expect(await store.remove(1)).toBe(true)
     expect(await store.remove(1)).toBe(false)
     await store.dispose()
@@ -140,6 +156,17 @@ describe('indexedDB driver', () => {
     const store = create(); await store.set('short', 1, { ttl: 5 }); now.mockReturnValue(1_006)
     expect(await store.get('short')).toBeNull()
     expect(await store.size()).toBe(0)
+    await store.dispose(); now.mockRestore()
+  })
+
+  it('excludes expired records from keys and size', async () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(1_000)
+    const store = create()
+    await store.set('expired', 1, { ttl: 5 })
+    await store.set('alive', 2)
+    now.mockReturnValue(1_006)
+    expect(await store.keys()).toEqual(['alive'])
+    expect(await store.size()).toBe(1)
     await store.dispose(); now.mockRestore()
   })
 })

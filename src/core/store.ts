@@ -15,7 +15,7 @@ export class OmniStore {
   size() { return this.driver.size() }
   clear() { return this.driver.clear() }
   async entries<T>(): Promise<StoreEntry<T>[]> { const keys = await this.keys(); const values = await Promise.all(keys.map(key => this.get<T>(key))); return keys.flatMap((key, index) => values[index] === null ? [] : [{ key, value: values[index]! }]) }
-  async cleanupExpired(): Promise<number> { const before = await this.keys(); await Promise.all(before.map(key => this.driver.get(key))); return before.length - (await this.keys()).length }
+  cleanupExpired() { return this.driver.cleanupExpired() }
   async dispose() { await this.driver.dispose?.() }
   async setMany<T>(entries: Iterable<readonly [StorageKey, T]>, options: SetOptions = {}): Promise<BatchResult<void>> { const list = [...entries]; const r = await Promise.allSettled(list.map(([k, v]) => this.set(k, v, options))); const succeeded = r.filter(x => x.status === 'fulfilled').length; return { data: undefined, total: list.length, succeeded, failed: list.length - succeeded } }
   async getMany<T>(keys: Iterable<StorageKey>): Promise<BatchResult<Map<StorageKey, T | null>>> { const list = [...keys], data = new Map<StorageKey, T | null>(); const r = await Promise.allSettled(list.map(k => this.get<T>(k))); const succeeded = r.filter(x => x.status === 'fulfilled').length; r.forEach((x, i) => { if (x.status === 'fulfilled') data.set(list[i]!, x.value) }); return { data, total: list.length, succeeded, failed: list.length - succeeded } }
