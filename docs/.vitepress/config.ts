@@ -1,2 +1,47 @@
 import { defineConfig } from 'vitepress'
-export default defineConfig({ lang: 'zh-CN', title: 'OmniStore', description: '统一、类型安全的浏览器存储工具', base: '/OmniStore/', lastUpdated: true, cleanUrls: true, appearance: 'force-light', themeConfig: { search: { provider: 'local' }, nav: [{ text: '指南', link: '/guide/getting-started' }, { text: '示例', link: '/guide/examples' }, { text: 'API', link: '/api/' }], sidebar: [{ text: '指南', items: [{ text: '快速开始', link: '/guide/getting-started' }, { text: '核心概念', link: '/guide/concepts' }, { text: '存储驱动', link: '/guide/drivers' }, { text: '方法示例', link: '/guide/examples' }, { text: '框架示例', link: '/guide/frameworks' }, { text: 'SSR 与错误处理', link: '/guide/ssr-errors' }] }, { text: 'API', items: [{ text: 'OmniStore', link: '/api/' }, { text: '配置与类型', link: '/api/options' }] }], socialLinks: [{ icon: 'github', link: 'https://github.com/yeyongzhi/OmniStore' }] } })
+
+export default defineConfig({
+  lang: 'zh-CN',
+  title: 'OmniStore',
+  description: '统一、类型安全的浏览器存储工具',
+  base: '/OmniStore/',
+  lastUpdated: true,
+  cleanUrls: true,
+  appearance: 'force-light',
+  themeConfig: {
+    search: { provider: 'local' },
+    nav: [
+      { text: '指南', link: '/guide/getting-started' },
+      { text: '示例', link: '/guide/examples' },
+      { text: 'API', link: '/api/' },
+    ],
+    sidebar: [
+      {
+        text: '指南',
+        items: [
+          { text: '快速开始', link: '/guide/getting-started' },
+          { text: '核心概念', link: '/guide/concepts' },
+          { text: '存储驱动', link: '/guide/drivers' },
+          { text: 'SSR 与错误处理', link: '/guide/ssr-errors' },
+        ],
+      },
+      {
+        text: '示例',
+        items: [
+          { text: '方法示例', link: '/guide/examples' },
+          { text: '框架示例', link: '/guide/frameworks' },
+        ],
+      },
+      {
+        text: 'API',
+        items: [
+          { text: 'OmniStore', link: '/api/' },
+          { text: '配置与类型', link: '/api/options' },
+        ],
+      },
+    ],
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/yeyongzhi/OmniStore' },
+    ],
+  },
+})
